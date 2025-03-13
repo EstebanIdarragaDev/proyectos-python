@@ -1,96 +1,107 @@
 from os import system
-from tabulate import tabulate # pip install tabulate
-from connection import connect, create_table
+from tabulate import tabulate # pip install tabulate -> global
+from connection import connection,create_table
 from contact import insert_contact, get_contacts, get_contact, update_contact, delete_contact
 
-
-# Inicializacion
-conn = connect()
+# Initialization
+conn = connection()
 create_table(conn)
 
 
 def start():
-    estado = True
 
-    while estado:
-        menu = """Selecione una opcion: 
+    menu = """ \nSeleccione una opcion:
     \t1.Añadir contacto
     \t2.Mostrar todos los contactos
     \t3.Buscar contacto
     \t4.Modificar contacto
     \t5.Eliminar contacto
-    \t6.Salir"""
+    \t6.Salir\n"""
+
+    estado = True
+    while estado:
+        # clear_terminal()
         print(menu)
-        opcion = input('Elije una opcion: ')
-        
-        match opcion:
-            case '1':
-                new_contact()
-            case '2':
-                show_contacts()
-            case '3':
-                show_contact()
-            case '4':
-                upt_contact()
-            case '5':
-                del_contact()
-            case '6':
-                estado = False
-            case _:
-                print('Opcion no valida')
+        option = input("Ingrese una opcion: #")
+        estado = process_option(option)
 
 
 
-# Ingresar un nuevo contacto
+def process_option(option):
+    clear_terminal()
+    match option:
+        case '1':
+            new_contact()
+        case '2':
+            show_contacts()
+        case '3':
+            show_contact()
+        case '4':
+            upt_contact()
+        case '5':
+            del_contact()
+        case '6':
+            return False
+        case _:
+            print('Opcion no valida')
+    return True      
+
+
+# option - new contact
 def new_contact():
-    system('cls')
-    print('Ingresa los siguiente datos')
-    nombre = input('Ingresa el nombre del contacto: ')
-    apellidos = input('Ingresa los apellidos del contacto: ')
-    empresa = input('Ingresa la empresa del contacto: ')
-    telefono = input('Ingresa el telefono del contacto: ')
-    email = input('Ingresa el email del contacto: ')
-    direccion = input('Ingresa el direccion del contacto: ')
+    print("Resgistrar Contacto : ")
+    nombres = input("Ingrese los nombres: ").strip().lower()
+    apellidos = input("Ingrese los apellidos: ").strip().lower()
+    empresa = input("Ingrese la empresa: ").strip().lower()
+    telefono = input("Ingrese el telefono: ").strip()
+    email = input("Ingrese el email: ").strip().lower()
+    direccion = input("Ingrese la direccion: ").strip().lower()
 
-    res = insert_contact(nombre, apellidos, empresa, telefono, email, direccion)
-    print(res)
+    print(insert_contact(nombres, apellidos, empresa, telefono, email, direccion))
 
-# Mostrar todos los contactos
+# option - get contacts
 def show_contacts():
-    system('cls')
+    print("Todos los contactos: ")
     contacts = get_contacts()
-    headers = ['ID', 'NOMBRE', 'APELLIDOS', 'EMPRESA', 'TELEFONO', 'EMAIL', 'DIRECCION']
-    table = tabulate(contacts, headers, tablefmt='fancy_grid')
-    print(table)
+    print(create_visual_table(contacts))
 
-# Mostrar un contacto
+# option - get contact
 def show_contact():
-    system('cls')
-    id_contact = input('Ingresa el id del contacto: ')
-    contact = get_contact(id_contact)
-    headers = ['ID', 'NOMBRE', 'APELLIDOS', 'EMPRESA', 'TELEFONO', 'EMAIL', 'DIRECCION']
-    table = tabulate(contact, headers, tablefmt='fancy_grid')
-    print(table)
-
-# Modificar un contacto
-def upt_contact():
-    system('cls')
-    print('Ingresa los siguientes datos')
-    nombre = input('Ingresa el nombre del contacto: ')
-    apellidos = input('Ingresa los apellidos del contacto: ')
-    empresa = input('Ingresa la empresa del contacto: ')
-    telefono = input('Ingresa el telefono del contacto: ')
-    email = input('Ingresa el email del contacto: ')
-    direccion = input('Ingresa el direccion del contacto: ')
-    id_contact = input('Ingresa el id del contacto: ')
-    res = update_contact(nombre, apellidos, empresa, telefono, email, direccion,id_contact)
-    print(res)
-    show_contacts()
-
-# Eliminar contacto
-def del_contact():
-    system('cls')
+    print("Contacto: ")
     id_contact = input('Ingrese el id del contacto: ')
-    res = delete_contact(id_contact)
-    show_contacts()
+    contact = [get_contact(id_contact)]
+    print(create_visual_table(contact))
+
+# option - update
+def upt_contact():
+    print("Modificar Contacto : ")
+    id_contact = input("Ingrese el id del contacto: ")
+    nombres = input("Ingrese los nombres: ").strip().lower()
+    apellidos = input("Ingrese los apellidos: ").strip().lower()
+    empresa = input("Ingrese la empresa: ").strip().lower()
+    telefono = input("Ingrese el telefono: ").strip()
+    email = input("Ingrese el email: ").strip().lower()
+    direccion = input("Ingrese la direccion: ").strip().lower() 
+
+    print(update_contact(id_contact, nombres, apellidos, empresa, telefono, email, direccion))
+
+# option - delete
+def del_contact():
+    print('Eliminar contacto: ')
+    id_contact = input("Ingrese el id del contacto: ")
+    resp = delete_contact(id_contact)
+    print(resp)
+
+
+# clear the terminal
+def clear_terminal():
+    system('cls')
+
+# crete table with tabulate
+def create_visual_table(data):
+    headers = ['ID', 'NOMBRE', 'APELLIDOS', 'EMPRESA', 'TELEFONO', 'EMAIL', 'DIRECCION']
+    table = tabulate(data, headers, tablefmt='fancy_grid')
+    return table
+
+
 start()

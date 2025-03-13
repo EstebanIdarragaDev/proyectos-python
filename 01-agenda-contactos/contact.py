@@ -1,72 +1,64 @@
-from connection import connect
 from sqlite3 import Error
+import sqlite3
 
 
-# Insertar contacto
-def insert_contact(nombre, apellidos, empresa, telefono, email, direccion):
+# insert contact
+def insert_contact(nombres, apellidos, empresa, telefono, email, direccion):
     try:
-        conn = connect()
-        cursor = conn.cursor()
-        query = """INSERT INTO contacto(nombre, apellidos, empresa, telefono, email, direccion)
-            VALUES (?,?,?,?,?,?)"""
-        data = (nombre, apellidos, empresa, telefono, email, direccion)
-        cursor.execute(query, data)
-        conn.commit()
-        conn.close()
-        return 'Contacto registrado'
-    except Error as err:
-        return f'Error al registrar contacto: {err}'
 
-# Obtener todos los contactos 
+        with sqlite3.connect('./contactos.db') as conn:
+            cursor = conn.cursor()
+            query = """INSERT INTO contacto(nombres, apellidos, empresa, telefono, email, direccion)
+                VALUES(?, ?, ?, ?, ?, ?)"""
+            cursor.execute(query, (nombres, apellidos, empresa, telefono, email, direccion))
+            conn.commit() # se usa commint dentro del with para asegurar que se guarden los cambios
+
+        return f"Contacto registrado"
+    except Error as err:
+        return f"Error al registrar contacto: {err}"
+
+# get all contacts 
 def get_contacts():
-    data = []
     try:
-        conn = connect()
-        cursor = conn.cursor()
-        query = "SELECT * FROM contacto"
-        cursor.execute(query)
-        data = cursor.fetchall()
-        conn.close()
-        return data
+        with sqlite3.connect('./contactos.db') as conn:
+            cursor = conn.cursor()
+            query = "SELECT * FROM contacto"
+            cursor.execute(query)
+            return cursor.fetchall()
     except Error as err:
-        return f'Error al buscar los contactos: {err}'
+        return f"Erro al traer todos los contactos: {err}"
     
-# Obtener un contacto
+# get one contact
 def get_contact(id):
-    data = []
     try:
-        conn = connect()
-        cursor = conn.cursor()
-        query = "SELECT * FROM contacto WHERE id=?"
-        cursor.execute(query,(id,))
-        data.append(cursor.fetchone())
-        conn.close()
-        return data
+        with sqlite3.connect('./contactos.db') as conn:
+            cursor = conn.cursor()
+            query = "SELECT * FROM contacto WHERE id = ?"
+            cursor.execute(query, (id,))
+            return cursor.fetchone()
     except Error as err:
-        return f'Error al buscar contacto: {err}'
+        return(f"Error al buscar el contacto: {err}")
     
-def update_contact(nombre, apellidos, empresa, telefono, email, direccion, id):
+# update contact
+def update_contact(id, nombres, apellidos, empresa, telefono, email, direccion):
     try:
-        conn = connect()
-        cursor = conn.cursor()
-        query = """UPDATE contacto set nombre=?, apellidos=?, empresa=?, telefono=?, email=?, direccion=? 
-        where id=?"""
-        data = (nombre, apellidos, empresa, telefono, email, direccion, id)
-        cursor.execute(query,data)
-        conn.commit()
-        conn.close()
-        return 'Contacto actualizado'
+        with sqlite3.connect('./contactos.db') as conn:
+            cursor = conn.cursor()
+            query = """ UPDATE contacto SET nombres=?, apellidos=?, empresa=?, telefono=?, email=?, direccion=?
+            WHERE id=?"""
+            cursor.execute(query, (nombres, apellidos, empresa, telefono, email, direccion, id))
+            conn.commit()
+        return "Contacto actualizado"
     except Error as err:
-        return f'Error al actualizar contacto {err}'
-        
+        return f"Error al actualizar usuario: {err}"
+    
+# delete contact
 def delete_contact(id):
     try:
-        conn = connect()
-        cursor = conn.cursor()
-        query = "DELETE FROM contacto WHERE id=?"
-        cursor.execute(query,(id,))
-        conn.commit()
-        conn.close()
-        return 'Contacto eliminado'
+        with sqlite3.connect('./contactos.db') as conn:
+            cursor = conn.cursor()
+            query = "DELETE FROM contacto WHERE id=?"
+            cursor.execute(query, (id,))
+        return "Contacto eliminado"
     except Error as err:
-        return f'Error al eliminar usuario'
+        return f"Error al eliminar el contacto: {err}"
